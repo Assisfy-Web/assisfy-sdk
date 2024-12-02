@@ -1,0 +1,12 @@
+{
+  "name": "assisfy-sdk",
+  "version": "1.2.1",
+  "description": "Assisfy bridges the gap between AI capabilities and real-world execution on the web.",
+  "main": "index.js",
+  "author": "Assisfy.ai <support@assisfy.com>",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^1.7.8",
+    "ws": "^8.18.0"
+  }
+}
