@@ -120,4 +120,4 @@ Contributions are welcome! Please open an issue or submit a pull request on GitH
 
 ## Support
 
-For support, please contact [support@assisfy.com](mailto:support@assisfy.com).
+For support, please contact [support@assisfy.ai](mailto:support@assisfy.ai).
