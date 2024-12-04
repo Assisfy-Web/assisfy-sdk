@@ -2,6 +2,8 @@
 
 The Assisfy SDK allows developers to integrate Assisfy's AI capabilities into their applications. This SDK provides a simple interface to create and manage sessions, handle events, and interact with external resources.
 
+![Assisfy SDK](./image.png)
+
 ## Installation
 
 To install the Assisfy SDK, use npm:
@@ -9,6 +11,15 @@ To install the Assisfy SDK, use npm:
 ```bash
 npm install assisfy-sdk
 ```
+
+## Generating API Keys
+
+To use the Assisfy SDK, you need to generate an API key from the Assisfy platform. Follow these steps:
+
+1. Visit [Assisfy Platform](https://app.assisfy.ai).
+2. Onboard your agent by following the platform's instructions.
+3. Navigate to the "API Key" tab.
+4. Copy the generated API key for use in your application.
 
 ## Usage
 
