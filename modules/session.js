@@ -4,6 +4,10 @@ const EventEmitter = require('events');
 
 class Session extends EventEmitter {
     sessionId;
+    handlePermissionRequest;
+    handleInput;
+    end;
+
     constructor(sdk) {
         super();
         this.setMaxListeners(100);
@@ -21,10 +25,23 @@ class Session extends EventEmitter {
             this.sessionId = data.sessionId;
             this.emit('session_created', { sessionId: this.sessionId });
 
-            new WebSocketSessionStrategy(
+            const socket = new WebSocketSessionStrategy(
                 this,
                 this.sdk
             );
+
+            this.handlePermissionRequest = socket.handlePermissionRequest;
+            this.handleInput = socket.handleInput;
+            this.end = (message) => {
+                console.log(`ending session: ${this.sessionId} `, message);
+                socket.close(1000, message || 'Ending session from client');
+            };
+
+            socket.on('message', (message) => {
+                if (message.event === 'complete') {
+                    this.end("Reason='Session completed'");
+                }
+            });
             return this;
         } catch (error) {
             const { response } = error;
@@ -32,6 +49,8 @@ class Session extends EventEmitter {
             throw new Error(errorObject.data.error);
         }
     }
+
+    
 }
 
 module.exports = Session;
