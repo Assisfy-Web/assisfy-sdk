@@ -1,7 +1,8 @@
-const sdk = require('assisfy-sdk');
+require('dotenv').config();
+const sdk = require('.');
 
 const assisfy = new sdk({
-    apiKey: "sk-proj-xxxxx",
+    apiKey: process.env.ASSISFY_API_KEY,
     environment: "production",
 });
 
