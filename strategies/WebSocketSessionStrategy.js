@@ -44,6 +44,7 @@ class WebSocketSessionStrategy {
     }
 
     handlePermissionRequest(granted = false) {
+        if (!this.websocket) return;
         this.websocket.send(JSON.stringify({
             type: 'external_resource_granted',
             data: { 
@@ -54,6 +55,7 @@ class WebSocketSessionStrategy {
     }
 
     handleInput(input = '') {
+        if (!this.websocket) return;
         this.websocket.send(JSON.stringify({
             type: 'external_resource_granted',
             data: { 
@@ -63,7 +65,6 @@ class WebSocketSessionStrategy {
             }
         }));
     }
-
 }
 
 module.exports = WebSocketSessionStrategy;
