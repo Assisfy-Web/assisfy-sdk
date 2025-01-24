@@ -3,13 +3,14 @@ const assisfy = require('./init');
 const asyncTest = async () => {
     const session = await assisfy.session().create({
         goal: "Who is the president of the United States?",
-        // Auto trigger every 30 minutes, end at 2025-01-20T00:00:00Z, start at 2025-01-29T00:00:00Z, and send a web hook to https://example.com/webhook
-        // include this is you'd like to auto trigger the session
+        // Specify SSE as the connection strategy (this is the default)
+        connectStrategy: 'sse',
+        // Auto trigger configuration is still supported
         // withAutoTrigger: {
         //     interval: 5,
         //     end_at: '2025-01-29T00:00:00Z',
-        //     start_now: true, // if true, the session will start immediately, change to false if you want to start at a specific time
-        //     web_hook_url: 'http://143.198.96.25:30400/example-webhook',
+        //     start_now: true,
+        //     web_hook_url: 'http://example.com/webhook',
         // }
     });
 
@@ -29,8 +30,10 @@ const asyncTest = async () => {
         console.log('session_disconnected', data);
     });
 
+    // The message event now includes more specific event types
     session.on('message', (data) => {
-        console.log('message', data);
+        console.log(`Received ${data.event} event:`, data.data);
+
         if (data.event === 'complete') {
             console.dir(data.data.cost_summary, { depth: null });
         }
@@ -47,4 +50,4 @@ const asyncTest = async () => {
     });
 }
 
-asyncTest();
+asyncTest(); 

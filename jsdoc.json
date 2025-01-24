@@ -1,0 +1,52 @@
+{
+    "source": {
+        "include": ["index.js", "modules", "strategies"],
+        "includePattern": ".js$",
+        "excludePattern": "(node_modules/|docs|examples)"
+    },
+    "plugins": ["plugins/markdown"],
+    "opts": {
+        "destination": "./wiki",
+        "recurse": true,
+        "readme": "./README.md",
+        "template": "node_modules/clean-jsdoc-theme",
+        "theme_opts": {
+            "default_theme": "dark",
+            "title": "Assisfy SDK Documentation",
+            "menu": [
+                {
+                    "title": "Website",
+                    "link": "https://assisfy-genesis.cv",
+                    "target": "_blank"
+                },
+                {
+                    "title": "Github",
+                    "link": "https://github.com/wilforlan/assisfy-sdk",
+                    "target": "_blank"
+                }
+            ],
+            "meta": [
+                {
+                    "name": "author",
+                    "content": "Assisfy"
+                },
+                {
+                    "name": "description",
+                    "content": "Documentation for the Assisfy SDK"
+                }
+            ]
+        }
+    },
+    "markdown": {
+        "hardwrap": false,
+        "idInHeadings": true
+    },
+    "templates": {
+        "cleverLinks": true,
+        "monospaceLinks": false,
+        "default": {
+            "outputSourceFiles": true,
+            "includeDate": false
+        }
+    }
+} 

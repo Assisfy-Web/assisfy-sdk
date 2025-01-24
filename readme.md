@@ -1,233 +1,173 @@
 # Assisfy SDK
 
-The Assisfy SDK allows developers to integrate Assisfy's AI capabilities into their applications. This SDK provides a simple interface to create and manage sessions, handle events, and interact with external resources.
-
-![Assisfy SDK](./image.png)
+The official SDK for interacting with Assisfy's AI Agent Platform. Build, deploy, and manage autonomous AI agents with ease.
 
 ## Installation
 
-To install the Assisfy SDK, use npm:
-
 ```bash
-npm install assisfy-sdk@latest
+npm install assisfy-sdk
+# or
+yarn add assisfy-sdk
 ```
 
-## Generating API Keys
-
-To use the Assisfy SDK, you need to generate an API key from the Assisfy platform. Follow these steps:
-
-1. Visit [Assisfy Console](https://app.assisfy.ai).
-2. Onboard your agent by following the platform's instructions.
-3. Navigate to the "API Key" tab.
-4. Copy the generated API key for use in your application.
-
-## Usage
-
-Below is an example of how to use the Assisfy SDK to create a session and handle various events.
+## Quick Start
 
 ```javascript
-const sdk = require('assisfy-sdk');
+const AssisfySDK = require('assisfy-sdk');
 
-const assisfy = new sdk({
-    apiKey: "your-api-key-here",
-    environment: "production", // or "development"
+// Initialize the SDK
+const assisfy = new AssisfySDK({
+    apiKey: 'your-api-key',
+    environment: 'production' // or 'staging' or 'development'
 });
 
-const asyncTest = async () => {
-    const session = await assisfy.session().create({
-        goal: "Who is the president of the United States?",
-    });
+// Create and connect to a session
+const session = await assisfy.session().create({
+    goal: "Analyze website content",
+    url: "https://example.com",
+    connectStrategy: 'sse' // or 'websocket'
+});
 
-    // start session with auto trigger
-    // Auto trigger every 30 minutes, end at 2025-01-20T00:00:00Z, start at 2025-01-29T00:00:00Z, and send a web hook to https://example.com/webhook
-    // include this is you'd like to auto trigger the session
+// Listen for events
+session.on('session_created', (data) => {
+    console.log('Session created:', data);
+});
 
-    // const session = await assisfy.session().create({
-    //     goal: "Go through https://assisfy.ai/blog and let me know the latest update on the blog",
-    //     withAutoTrigger: {
-    //         interval: 30,
-    //         end_at: '2025-01-20T00:00:00Z',
-    //         start_at: '2025-01-29T00:00:00Z',
-    //         web_hook_url: 'https://example.com/webhook',
-    //     }
-    // });
+session.on('message', (data) => {
+    console.log(`Received ${data.event} event:`, data.data);
+});
 
-    session.on('session_created', (data) => {
-        console.log('session_created', data);
-    });
-
-    session.on('session_connected', (data) => {
-        console.log('session_connected', data);
-    });
-
-    session.on('session_error', (data) => {
-        console.log('session_error', data);
-    });
-
-    session.on('session_disconnected', (data) => {
-        console.log('session_disconnected', data);
-    });
-
-    session.on('message', (data) => {
-        console.log('message', data);
-        if (data.event === 'complete') {
-            console.dir(data.data.cost_summary, { depth: null });
-        }
-
-        if (data.event === 'external_resource_requested') {
-            console.log('external_resource_requested', data.data);
-            if (data.data.resource_type === 'admin_permission_request') {
-                session.handlePermissionRequest(true);
-            }
-            if (data.data.resource_type === 'request_user_input') {
-                session.handleInput('test');
-            }
-        }
-    });
-}
-
-asyncTest();
-```
-
-## API Reference
-
-### Initialization
-
-To initialize the SDK, create a new instance with your API key and environment:
-
-```javascript
-const assisfy = new sdk({
-    apiKey: "your-api-key-here",
-    environment: "production", // or "development"
+// Handle permission requests
+session.on('message', (data) => {
+    if (data.event === 'external_resource_requested') {
+        session.handlePermissionRequest(true);
+    }
 });
 ```
 
-### Creating a Session
+## Features
 
-To create a session, use the `create` method with a goal:
+- **Multiple Connection Strategies**: Choose between Server-Sent Events (SSE) or WebSocket connections
+- **Environment Support**: Production, Staging, and Development environments
+- **Auto-Trigger Support**: Schedule recurring agent sessions
+- **Type Safety**: Full TypeScript/JSDoc type definitions
+- **Event-Driven**: Real-time updates through event listeners
+- **Error Handling**: Comprehensive error handling and reporting
+
+## Connection Strategies
+
+### SSE (Default)
+Server-Sent Events provide a lightweight, unidirectional connection that's perfect for most use cases:
 
 ```javascript
 const session = await assisfy.session().create({
     goal: "Your goal here",
+    connectStrategy: 'sse' // This is the default
 });
 ```
 
-### Event Handling
-
-The session object emits several events that you can listen to:
-
-- `session_created`: Fired when a session is successfully created.
-- `session_connected`: Fired when a session is connected.
-- `session_error`: Fired when there is an error in the session.
-- `session_disconnected`: Fired when a session is disconnected.
-- `message`: Fired when a message is received. This event can include sub-events like `complete` and `external_resource_requested`.
-
-### Handling External Resources
-
-When a message event with `external_resource_requested` is received, you can handle it by checking the `resource_type` and responding accordingly:
+### WebSocket
+For cases where you need bidirectional communication:
 
 ```javascript
-session.on('message', (data) => {
-    if (data.event === 'complete') {
-        console.dir(data.data.cost_summary, { depth: null });
-    }
+const session = await assisfy.session().create({
+    goal: "Your goal here",
+    connectStrategy: 'websocket'
+});
+```
 
-    if (data.event === 'external_resource_requested') {
-        console.log('external_resource_requested', data.data);
-        if (data.data.resource_type === 'admin_permission_request') {
-            session.handlePermissionRequest(true);
-        }
-        if (data.data.resource_type === 'request_user_input') {
-            session.handleInput('test');
-        }
+## Auto-Trigger Configuration
+
+Schedule recurring agent sessions:
+
+```javascript
+const session = await assisfy.session().create({
+    goal: "Daily website analysis",
+    url: "https://example.com",
+    withAutoTrigger: {
+        interval: 1440, // Run daily (in minutes)
+        end_at: '2024-12-31T23:59:59Z',
+        start_now: true,
+        web_hook_url: 'https://your-webhook.com/endpoint'
     }
 });
 ```
 
-### Auto Trigger
-Auto trigger allows you to trigger a job that runs at some interval. 
-This requires starting the session like so
+## Event Types
+
+The SDK emits various events that you can listen to:
+
+- `session_created`: When a new session is created
+- `session_connected`: When the connection is established
+- `session_error`: When an error occurs
+- `session_disconnected`: When the connection is closed
+- `message`: For all agent events:
+  - `started`: Agent session started
+  - `browser_started`: Browser automation started
+  - `action_run`: Agent performed an action
+  - `thoughts_and_memories`: Agent's thought process
+  - `external_resource_requested`: Agent needs permission
+  - `complete`: Agent completed the task
+  - `error`: An error occurred
+  - `heartbeat`: Connection health check
+  - `connected`: Initial connection established
+
+## Environment Configuration
+
+### Production
+```javascript
+const assisfy = new AssisfySDK({
+    apiKey: 'your-api-key',
+    environment: 'production' // Uses assisfy-genesis.cv
+});
+```
+
+### Staging
+```javascript
+const assisfy = new AssisfySDK({
+    apiKey: 'your-api-key',
+    environment: 'staging' // Uses developer.assisfy-genesis.cv
+});
+```
+
+### Development
+```javascript
+const assisfy = new AssisfySDK({
+    apiKey: 'your-api-key',
+    environment: 'development', // Uses localhost
+    config: {
+        // Optional: Override specific config values
+        baseUrl: 'http://localhost:31190/api/v1'
+    }
+});
+```
+
+## Error Handling
+
+The SDK provides detailed error information:
 
 ```javascript
-    // start session with auto trigger
-    // Auto trigger every 30 minutes, end at 2025-01-20T00:00:00Z, start at 2025-01-29T00:00:00Z, and send a web hook to https://example.com/webhook
-    // include this is you'd like to auto trigger the session
-
+try {
     const session = await assisfy.session().create({
-        goal: "Go through https://assisfy.ai/blog and let me know the latest update on the blog",
-        withAutoTrigger: {
-            interval: 30,
-            end_at: '2025-01-20T00:00:00Z',
-            start_at: '2025-01-29T00:00:00Z',
-            web_hook_url: 'https://example.com/webhook',
-        }
+        goal: "Your goal here"
     });
-
-    // your sessions will respond with the following object
-```
-
-With this approach, you will not be able to use the socket session but rely on the webhook events to listen to activities
-All activities here include:
-```
-- trigger.session.started
-- trigger.action.run
-- trigger.external.resource.requested
-- trigger.thoughts.and.memories
-- trigger.browser.started
-- trigger.complete
-- trigger.error
-```
-
-Your webhook will receive this type of event for example
-```
-{
-    event: 'trigger.action.run',
-    data: {
-        ...other data information,
-        tracking_id: activity.tracking_id
-    },
+} catch (error) {
+    console.error('Error creating session:', error.message);
 }
-```
-and so on
 
-It'll be important to handle the external resource request just like we'd normally would.
-As of SDK v1.5.0, we now allow `.connect()` method which allows you to connect to an existing session.
-
-For every new session that is started via the auto trigger, you'll receive the `trigger.session.started` event which contains a `sessionId` on it's body
-This means that you can pass the sessionId to the method like so `const session = await sdk.session().connect('1234567890');` 
-After your webhook receive this event, based on your judgement of the task of the agent, you should connect to the session so you can handle the permission and resource request
-
-```javascript
-const session = await sdk.session().connect('your_session_id_here');
-session.on('message', (data) => {
-    if (data.event === 'complete') {
-        console.dir(data.data.cost_summary, { depth: null });
-    }
-
-    if (data.event === 'external_resource_requested') {
-        console.log('external_resource_requested', data.data);
-        if (data.data.resource_type === 'admin_permission_request') {
-            session.handlePermissionRequest(true);
-        }
-        if (data.data.resource_type === 'request_user_input') {
-            session.handleInput('test');
-        }
-    }
+session.on('session_error', (error) => {
+    console.error('Session error:', error);
 });
 ```
 
-## Examples
+## API Reference
 
-Kindly see the `examples` folder on how to create a session and connect with other sessions respectively
-
-## License
-
-This SDK is licensed under the MIT License. See the LICENSE file for more information.
+For detailed API documentation, please visit our [API Reference](./wiki/index.html).
 
 ## Contributing
 
-Contributions are welcome! Please open an issue or submit a pull request on GitHub.
+Please read our [Contributing Guide](./CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
 
-## Support
+## License
 
-For support, please contact [williams@assisfy.ai](mailto:williams@assisfy.ai).
+This project is licensed under the MIT License - see the [LICENSE](./LICENSE) file for details.
